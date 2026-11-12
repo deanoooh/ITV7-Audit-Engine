@@ -149,13 +149,13 @@ def compute_row(row: Row) -> Row:
             row.errors.append("EW declared but place terms unparseable")
             return row
         win_component = 0.0
-        place_component = 0.0
-        if position == 1:
-            win_component = round 0.50 * sp_dec
-        if position is not None and position <= row.places_paid:
-            place_dec = 1 + float(sp_frac * row.ew_fraction)
-            place_component = round 0.50 * place_dec
-        row.return_amount = round(win_component + place_component, 2)
+place_component = 0.0
+if position == 1:
+win_component = 0.50 * sp_dec
+if position is not None and position <= row.places_paid:
+place_dec = 1 + float(sp_frac * row.ew_fraction)
+place_component = 0.50 * place_dec
+row.return_amount = round(win_component + place_component, 2)
 
     row.pnl = round(row.return_amount - row.stake, 2)
     return row
