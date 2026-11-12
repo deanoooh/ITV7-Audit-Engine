@@ -150,9 +150,9 @@ def compute_row(row: Row) -> Row:
             return row
         win_component = 0.0
 place_component = 0.0
-if position == 1:
+  if position == 1:
 win_component = 0.50 * sp_dec
-if position is not None and position <= row.places_paid:
+  if position is not None and position <= row.places_paid:
 place_dec = 1 + float(sp_frac * row.ew_fraction)
 place_component = 0.50 * place_dec
 row.return_amount = round(win_component + place_component, 2)
