@@ -15,6 +15,7 @@ Authoritative rules (from Master Analysis Engine v5.28.1-C8.3):
 """
 
 from dataclasses import dataclass, field
+from decimal import Decimal, ROUND_HALF_UP
 from fractions import Fraction
 from typing import Optional, List, Tuple
 import re
