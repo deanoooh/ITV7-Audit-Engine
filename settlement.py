@@ -31,6 +31,11 @@ POSITION_MAP = {
 NON_FINISHERS = {"UR", "PU", "FELL", "BD", "RO", "CO", "F", "NR", "REF", "VOID"}
 
 
+def round2(value: float) -> float:
+    """Standard commercial rounding to 2 decimals (0.005 rounds up)."""
+    return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
 # ---------- Primitive parsers ----------
 
 def parse_fractional_odds(s: str) -> Optional[Fraction]:
@@ -143,7 +148,7 @@ def compute_row(row: Row) -> Row:
     position, _ = parse_result(row.result)
 
     if kind == "WIN":
-        row.return_amount = round(1.00 * sp_dec, 2) if position == 1 else 0.0
+        row.return_amount = round2(1.00 * sp_dec) if position == 1 else 0.0
 
     elif kind == "EW":
         if row.ew_fraction is None:
@@ -152,13 +157,13 @@ def compute_row(row: Row) -> Row:
         win_component = 0.0
         place_component = 0.0
         if position == 1:
-            win_component = round(0.50 * sp_dec, 2)
+            win_component = 0.50 * sp_dec
         if position is not None and position <= row.places_paid:
             place_dec = 1 + float(sp_frac * row.ew_fraction)
-            place_component = round(0.50 * place_dec, 2)
-        row.return_amount = round(win_component + place_component, 2)
+            place_component = 0.50 * place_dec
+        row.return_amount = round2(win_component + place_component)
 
-    row.pnl = round(row.return_amount - row.stake, 2)
+    row.pnl = round2(row.return_amount - row.stake)
     return row
 
 
@@ -254,9 +259,9 @@ def parse_settlement_table(text: str) -> Tuple[List[Row], List[str]]:
 # ---------- Verification output ----------
 
 def build_verified_totals(rows: List[Row], meeting: str, date: str) -> str:
-    total_staked = round(sum(r.stake for r in rows), 2)
-    total_return = round(sum(r.return_amount for r in rows), 2)
-    net_pnl = round(total_return - total_staked, 2)
+    total_staked = round2(sum(r.stake for r in rows))
+    total_return = round2(sum(r.return_amount for r in rows))
+    net_pnl = round2(total_return - total_staked)
     roi = round((net_pnl / total_staked * 100) if total_staked else 0.0, 2)
 
     tiers = {"PRIMARY": [], "SECONDARY": [], "CHAOS": []}
@@ -268,9 +273,9 @@ def build_verified_totals(rows: List[Row], meeting: str, date: str) -> str:
         trows = tiers.get(name, [])
         if not trows:
             continue
-        t_stake = round(sum(r.stake for r in trows), 2)
-        t_ret = round(sum(r.return_amount for r in trows), 2)
-        t_pnl = round(t_ret - t_stake, 2)
+        t_stake = round2(sum(r.stake for r in trows))
+        t_ret = round2(sum(r.return_amount for r in trows))
+        t_pnl = round2(t_ret - t_stake)
         t_roi = round((t_pnl / t_stake * 100) if t_stake else 0.0, 2)
         t_bets = sum(1 for r in trows if r.stake > 0)
         t_wins = sum(1 for r in trows if r.stake > 0 and parse_result(r.result)[0] == 1)
