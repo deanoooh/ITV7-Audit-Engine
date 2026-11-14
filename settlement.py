@@ -139,6 +139,13 @@ def compute_row(row: Row) -> Row:
     # Both WIN and EW have £1.00 total exposure
     row.stake = 1.00
 
+    # Non-finishers (PU, UR, Fell, etc.) return £0 regardless of SP.
+    # They don't need an SP to be parsed, so exit before the SP check.
+    if not row.is_finisher:
+        row.return_amount = 0.0
+        row.pnl = round2(row.return_amount - row.stake)
+        return row
+
     sp_frac = parse_fractional_odds(row.sp)
     if sp_frac is None:
         row.errors.append(f"Cannot parse SP: {row.sp!r}")
