@@ -118,9 +118,13 @@ class Row:
 def compute_row(row: Row) -> Row:
     row.errors = []
     kind = classify_declared(row.declared)
+    result_is_nr = row.result.strip().upper().startswith("NR")
 
-    # NR detection
-    if row.result.strip().upper().startswith("NR") or kind == "NR":
+    # Cache the result parse once — this sets both position and is_finisher
+    row.position, row.is_finisher = parse_result(row.result)
+
+    # NR detection — either the declared method or the result says NR
+    if result_is_nr or kind == "NR":
         row.stake = 0.0
         row.return_amount = 0.0
         row.pnl = 0.0
