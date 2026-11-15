@@ -61,8 +61,13 @@ def fractional_to_decimal(frac: Fraction) -> float:
 def parse_place_terms(s: str) -> Tuple[Optional[Fraction], int]:
     """'1/4 odds 2 places' -> (Fraction(1,4), 2). 'Win Only' -> (None, 1)."""
     low = s.strip().lower()
+    
     if "win only" in low or "win-only" in low:
         return (None, 1)
+        
+    # Strip common prefixes like "e/w" or "each way" so they don't break the regex
+    low = re.sub(r"^(e/w|e-w|each[\s-]way)\s*", "", low)
+    
     m = re.search(r"(\d+)/(\d+)\s*odds\s*(\d+)\s*places?", low)
     if not m:
         return (None, 0)
