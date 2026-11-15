@@ -68,7 +68,8 @@ def parse_place_terms(s: str) -> Tuple[Optional[Fraction], int]:
     # Strip common prefixes like "e/w" or "each way" so they don't break the regex
     low = re.sub(r"^(e/w|e-w|each[\s-]way)\s*", "", low)
     
-    m = re.search(r"(\d+)/(\d+)\s*odds\s*(\d+)\s*places?", low)
+    # Accept both "1/5 odds 3 places" and "1/5 3 places" / "E/W 1/5 3 places"
+    m = re.search(r"(\d+)/(\d+)\s*(?:odds\s*)?(\d+)\s*places?", low)
     if not m:
         return (None, 0)
     return (Fraction(int(m.group(1)), int(m.group(2))), int(m.group(3)))
