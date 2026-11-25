@@ -365,3 +365,35 @@ def validate(rows: List[Row]) -> List[str]:
             errors.append(f"{race}: {count} rows (expected 3)")
 
     return errors
+
+def generate_csv_row(rows: List[Row], meeting: str, date: str, engine: str, notes: str = "") -> str:
+    """Generate a CSV line for the Master Ledger spreadsheet."""
+    total_staked = round2(sum(r.stake for r in rows))
+    total_return = round2(sum(r.return_amount for r in rows))
+    net_pnl = round2(total_return - total_staked)
+    roi = round((net_pnl / total_staked * 100) if total_staked else 0.0, 2)
+    
+    active_bets = sum(1 for r in rows if r.stake > 0)
+    nobets = sum(1 for r in rows if classify_declared(r.declared) == "NOBET")
+    
+    tiers = {"PRIMARY": [], "SECONDARY": [], "CHAOS": []}
+    for r in rows:
+        tiers.setdefault(r.tier.upper(), []).append(r)
+        
+    def get_tier_stats(name):
+        trows = tiers.get(name, [])
+        t_stake = round2(sum(r.stake for r in trows))
+        t_ret = round2(sum(r.return_amount for r in trows))
+        t_pnl = round2(t_ret - t_stake)
+        return t_stake, t_ret, t_pnl
+
+    p_s, p_r, p_p = get_tier_stats("PRIMARY")
+    s_s, s_r, s_p = get_tier_stats("SECONDARY")
+    c_s, c_r, c_p = get_tier_stats("CHAOS")
+    
+    # Quote notes to prevent comma issues
+    notes_clean = notes.replace('"', '""')
+    
+    csv_line = f"{date},{meeting},{engine},{len(set(r.race_id for r in rows))},{active_bets},{total_staked:.2f},{total_return:.2f},{net_pnl:.2f},{roi:.2f},{p_s:.2f},{p_r:.2f},{p_p:.2f},{s_s:.2f},{s_r:.2f},{s_p:.2f},{c_s:.2f},{c_r:.2f},{c_p:.2f},{nobets},\"{notes_clean}\""
+    
+    return csv_line
