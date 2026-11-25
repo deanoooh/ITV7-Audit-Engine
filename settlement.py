@@ -209,6 +209,9 @@ def parse_settlement_table(text: str) -> Tuple[List[Row], List[str]]:
     rows: List[Row] = []
     warnings: List[str] = []
 
+        # Force line breaks before tiers and race headers in case AI formatting mashes them together
+    text = re.sub(r'(PRIMARY:|SECONDARY:|CHAOS:|=== RACE)', r'\n\1', text)
+    
     text = _normalise(text)
     current_header = ""
     current_id = ""
